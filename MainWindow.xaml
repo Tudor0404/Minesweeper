@@ -1,0 +1,423 @@
+﻿<Window x:Class="Minesweeper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Minesweeper"
+        mc:Ignorable="d"
+        Title="Minesweeper"
+        MinHeight="600"
+        MinWidth="1100"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        SizeChanged="Window_SizeChanged">
+    <materialDesign:DialogHost Identifier="RootDialog"
+                               materialDesign:DialogHost.DialogClosing="DialogClosing_DeleteRun">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="*"
+                                  MaxWidth="350" />
+            </Grid.ColumnDefinitions>
+
+            <!--Play area-->
+            <materialDesign:Card Margin="16"
+                                 Grid.Column="0"
+                                 Grid.Row="0"
+                                 x:Name="CardPlayAreaContainer"
+                                 VerticalAlignment="Stretch"
+                                 HorizontalAlignment="Stretch"
+                                 MouseMove="CardPlayAreaContainer_MouseMove">
+                <Grid x:Name="GridPlayArea"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Center"
+                      Margin="4"
+                      Background="#e0e0e0"
+                      MouseWheel="GridPlayArea_MouseWheel"
+                      MouseDown="GridPlayArea_MouseDown"
+                      MouseUp="GridPlayArea_MouseUp">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <MatrixTransform x:Name="GridPlayAreaMatrixTransform" />
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                </Grid>
+            </materialDesign:Card>
+
+            <!--Settings and properties-->
+            <materialDesign:Card Grid.Row="0"
+                                 Grid.Column="1"
+                                 Margin="16"
+                                 Padding="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!--Title-->
+                    <TextBlock Style="{DynamicResource MaterialDesignHeadline4TextBlock}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,16">Minesweeper</TextBlock>
+
+                    <!--Game Information-->
+                    <materialDesign:Card Background="{DynamicResource MaterialDesignDarkBackground}"
+                                         Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                                         Grid.Row="1"
+                                         UniformCornerRadius="8"
+                                         materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                                         Margin="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock x:Name="TextBombCounter"
+                                       Style="{DynamicResource MaterialDesignHeadline5TextBlock}"
+                                       Grid.Row="0"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="8">Bombs Left: None</TextBlock>
+                            <TextBlock x:Name="TextClock"
+                                       Style="{DynamicResource MaterialDesignHeadline5TextBlock}"
+                                       Grid.Row="1"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="8">00:00:00</TextBlock>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <!--Settings-->
+                    <ScrollViewer x:Name="ScrollViewerSettings"
+                                  PreviewMouseWheel="ScrollViewerSettings_PreviewMouseWheel"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  Grid.Row="2"
+                                  CanContentScroll="False"
+                                  VerticalAlignment="Top">
+                        <Grid MinHeight="500">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*"
+                                               MinHeight="300" />
+                            </Grid.RowDefinitions>
+
+                            <!--Difficulty and seed-->
+                            <materialDesign:Card Background="{DynamicResource MaterialDesignDarkBackground}"
+                                                 Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                                                 Grid.Row="1"
+                                                 UniformCornerRadius="8"
+                                                 materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                                                 Margin="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0"
+                                          Margin="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{DynamicResource MaterialDesignSubtitle1TextBlock}"
+                                                   Grid.Column="0"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0">Difficulty</TextBlock>
+                                        <ComboBox x:Name="ComboBoxSelectDifficulty"
+                                                  Grid.Column="1">
+                                        </ComboBox>
+                                    </Grid>
+
+                                    <Grid Grid.Row="1"
+                                          Margin="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{DynamicResource MaterialDesignSubtitle1TextBlock}"
+                                                   Grid.Column="0"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0">Seed</TextBlock>
+                                        <TextBox x:Name="TextBoxSeed"
+                                                 Grid.Column="1"
+                                                 materialDesign:HintAssist.Hint="Leave empty for random" />
+                                    </Grid>
+
+                                    <Button x:Name="ButtonStartGame"
+                                            Grid.Row="2"
+                                            Click="ButtonStartGame_Click"
+                                            Margin="8"
+                                            Style="{DynamicResource MaterialDesignFlatDarkBgButton}"
+                                            materialDesign:ShadowAssist.ShadowDepth="Depth1">
+                                        Start
+                                    </Button>
+                                    <Button x:Name="ButtonResetTransform"
+                                            Grid.Row="3"
+                                            Click="ButtonResetTransform_Click"
+                                            Margin="8"
+                                            Style="{DynamicResource MaterialDesignFlatDarkBgButton}"
+                                            materialDesign:ShadowAssist.ShadowDepth="Depth1">
+                                        Reset view
+                                    </Button>
+                                </Grid>
+                            </materialDesign:Card>
+
+                            <!--Past runs-->
+                            <materialDesign:Card Grid.Row="2"
+                                                 UniformCornerRadius="8"
+                                                 materialDesign:ShadowAssist.ShadowDepth="Depth1"
+                                                 Margin="8"
+                                                 Background="{DynamicResource MaterialDesignDarkBackground}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*"
+                                                       MaxHeight="300" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Style="{DynamicResource MaterialDesignHeadline5TextBlock}"
+                                               Grid.Row="0"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="8, 4, 8, 4">Past runs</TextBlock>
+                                    <materialDesign:Card Background="{DynamicResource PrimaryHueDarkBrush}"
+                                                         Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                                                         UniformCornerRadius="6"
+                                                         Grid.Row="1"
+                                                         Margin="4">
+                                        <ListBox Style="{StaticResource MaterialDesignChoiceChipListBox}"
+                                                 x:Name="RadioButtonGroupChoiceChip"
+                                                 SelectionChanged="RadioButtonGroupChoiceChip_SelectionChanged">
+                                        </ListBox>
+                                    </materialDesign:Card>
+                                    <materialDesign:Card Background="{DynamicResource PrimaryHueDarkBrush}"
+                                                         Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                                                         Margin="4"
+                                                         Grid.Row="2">
+                                        <ScrollViewer  x:Name="ListBoxContainerPastRuns"
+                                                       PreviewMouseWheel="ListBoxContainerPastRuns_PreviewMouseWheel"
+                                                       MaxHeight="300">
+                                            <ListBox Style="{DynamicResource MaterialDesignListBox}"
+                                                     x:Name="ListBoxPastRuns"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                     PreviewMouseDown="ListBoxPastRuns_PreviewMouseDown">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="FontSize"
+                                                                Value="14"></Setter>
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                            </ListBox>
+                                        </ScrollViewer>
+                                    </materialDesign:Card>
+                                </Grid>
+                            </materialDesign:Card>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </materialDesign:DialogHost>
+    <Window.Resources>
+        <!--High quality cell images-->
+        <Style TargetType="Rectangle">
+            <Setter Property="RenderOptions.BitmapScalingMode"
+                    Value="HighQuality" />
+        </Style>
+        <!--Run info dialog-->
+        <DataTemplate DataType="{x:Type local:Run}">
+            <StackPanel Margin="16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Vertical">
+                <TextBlock Style="{DynamicResource MaterialDesignHeadline5TextBlock}"
+                           Grid.Column="0"
+                           Grid.Row="0"
+                           Grid.RowSpan="2"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Margin="8">Run Stats</TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="0"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="4">Difficulty</TextBlock>
+                    <TextBlock Text="{Binding Difficulty}"
+                               Grid.Column="1"
+                               Grid.Row="0"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               Margin="4"></TextBlock>
+
+                    <Separator Grid.Row="1"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2" />
+
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="3"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="4">Time</TextBlock>
+                    <TextBlock Text="{Binding TimeFormatted}"
+                               Grid.Column="1"
+                               Grid.Row="3"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               Margin="4"></TextBlock>
+
+                    <Separator Grid.Row="4"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2" />
+
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="4">Date Started</TextBlock>
+                    <TextBlock Text="{Binding DateStartedFormatted}"
+                               Grid.Column="1"
+                               Grid.Row="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               Margin="4"></TextBlock>
+
+                    <Separator Grid.Row="6"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2" />
+
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="7"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="4">Random Seed?</TextBlock>
+                    <TextBlock Text="{Binding SeedWasRandom}"
+                               Grid.Column="1"
+                               Grid.Row="7"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               Margin="4"></TextBlock>
+
+                    <Separator Grid.Row="8"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2" />
+
+                    <TextBlock Grid.Column="0"
+                               Grid.Row="9"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="4">Seed</TextBlock>
+                    <TextBlock Text="{Binding Seed}"
+                               Grid.Column="1"
+                               Grid.Row="9"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               Margin="4"></TextBlock>
+                </Grid>
+                <Grid Margin="0,8,0,8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Margin="4">
+                        Close
+                    </Button>
+                    <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                            CommandParameter="{Binding DateStarted}"
+                            materialDesign:DialogHost.DialogClosingAttached="DialogClosing_DeleteRun"
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            Margin="4">
+                        Delete
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </DataTemplate>
+        <!--Standard dialog-->
+        <DataTemplate DataType="{x:Type local:DialogTemplate}">
+            <StackPanel Margin="16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Vertical">
+                <TextBlock Text="{Binding Title}"
+                           Style="{DynamicResource MaterialDesignHeadline5TextBlock}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="8" />
+                <TextBlock Text="{Binding Content}"
+                           Style="{DynamicResource MaterialDesignBody1TextBlock}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="8" />
+                <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Margin="4">
+                    Close
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+</Window>
